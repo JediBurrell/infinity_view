@@ -1,0 +1,19 @@
+name: infinity_view
+description: Infinity View allows you to create a view that can be transformed infinitely.
+version: 0.1.0
+repository: https://github.com/JediBurrell/infinity_view
+
+environment:
+  sdk: '>=2.19.6 <4.0.0'
+  flutter: ">=1.17.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
+
+flutter:
