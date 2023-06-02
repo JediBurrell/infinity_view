@@ -195,27 +195,19 @@ class _InfinityViewState extends State<InfinityView> {
     setState(() => matrix = newMatrix);
   }
 
-  Matrix4 _translate(Offset translation) {
-    var dx = translation.dx;
-    var dy = translation.dy;
-
-    return Matrix4.identity()..translate(dx, dy);
-  }
+  Matrix4 _translate(Offset translation) =>
+      Matrix4.identity()..translate(translation.dx, translation.dy);
 
   Matrix4 _scale(double scale, Offset focalPoint) {
-    var dx = (1 - scale) * focalPoint.dx;
-    var dy = (1 - scale) * focalPoint.dy;
-
+    var delta = focalPoint * (1 - scale);
     return Matrix4.identity()
       ..scale(scale)
-      ..translate(dx, dy);
+      ..translate(delta.dx, delta.dy);
   }
 
   Matrix4 _rotate(double angle, Offset focalPoint) {
-    var c = cos(angle);
-    var s = sin(angle);
-    var dx = (1 - c) * focalPoint.dx + s * focalPoint.dy;
-    var dy = (1 - c) * focalPoint.dy - s * focalPoint.dx;
+    var dx = (1 - cos(angle)) * focalPoint.dx + sin(angle) * focalPoint.dy;
+    var dy = (1 - cos(angle)) * focalPoint.dy - sin(angle) * focalPoint.dx;
 
     return Matrix4.identity()
       ..translate(dx, dy)
