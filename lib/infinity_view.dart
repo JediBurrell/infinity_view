@@ -61,7 +61,15 @@ class InfinityView extends StatefulWidget {
   final double rotationSnappingTheshold;
   double get _rotationSnappingThesholdRadians =>
       rotationSnappingTheshold * pi / 180;
-  final _snappingMultiplesRadians = 90 * pi / 180;
+
+  /// The angles that the rotation will snap to.
+  /// This number is in degrees and should be a fraction of 360.
+  ///
+  /// This will only be applied if [rotationSnappingTheshold] is greater than 0.
+  ///
+  /// Defaults to 90 degrees.
+  final double rotationSnappingIncrements;
+  double get _snappingMultiplesRadians => rotationSnappingIncrements * pi / 180;
 
   /// Determines whether the [InfinityView] should apply the translation
   ///
@@ -94,6 +102,7 @@ class InfinityView extends StatefulWidget {
     this.shouldRotate = false,
     this.scrollWheelSensitivity = 1.0,
     this.rotationSnappingTheshold = 0.0,
+    this.rotationSnappingIncrements = 90.0,
     this.focalPointAlignment,
     this.translationTest,
     this.scaleTest,
