@@ -54,6 +54,15 @@ class InfinityView extends StatefulWidget {
   /// Defaults to 1.0.
   final double scrollWheelSensitivity;
 
+  /// The threshold for snapping to the nearest 90 degree angle when rotating.
+  /// If the angle is within this threshold, it will snap to the nearest 90 degree angle.
+  ///
+  /// Defaults to 0.0, or no snapping.
+  final double rotationSnappingTheshold;
+  double get _rotationSnappingThesholdRadians =>
+      rotationSnappingTheshold * pi / 180;
+  final _snappingMultiplesRadians = 90 * pi / 180;
+
   /// Determines whether the [InfinityView] should apply the translation
   ///
   /// You can use this to only allow translation when a certain condition is met.
@@ -84,6 +93,7 @@ class InfinityView extends StatefulWidget {
     this.shouldScale = true,
     this.shouldRotate = false,
     this.scrollWheelSensitivity = 1.0,
+    this.rotationSnappingTheshold = 0.0,
     this.focalPointAlignment,
     this.translationTest,
     this.scaleTest,
@@ -99,6 +109,16 @@ class _InfinityViewState extends State<InfinityView> {
 
   @override
   Widget build(BuildContext context) {
+    final array = matrix.applyToVector3Array([0, 0, 0, 1, 0, 0]);
+    double rot = Offset(array[3] - array[0], array[4] - array[1]).direction;
+    double snappedRot = rot;
+    if ((rot.abs() + widget._rotationSnappingThesholdRadians / 2) %
+            (widget._snappingMultiplesRadians) <
+        widget._rotationSnappingThesholdRadians) {
+      snappedRot = widget._snappingMultiplesRadians *
+          (rot / widget._snappingMultiplesRadians).round();
+    }
+
     return Listener(
       behavior: HitTestBehavior.deferToChild,
       onPointerPanZoomStart: (details) =>
@@ -133,12 +153,15 @@ class _InfinityViewState extends State<InfinityView> {
           // We're using a transparent container to allow the child to receive
           // pointer events outside of the child's bounds.
           color: Colors.transparent,
-          child: Transform(
-            transform: matrix,
-            child: Container(
-              color: Colors.transparent,
-              child: SizedBox.expand(
-                child: ClipRect(child: widget.child),
+          child: Transform.rotate(
+            angle: snappedRot - rot,
+            child: Transform(
+              transform: matrix,
+              child: Container(
+                color: Colors.transparent,
+                child: SizedBox.expand(
+                  child: ClipRect(child: widget.child),
+                ),
               ),
             ),
           ),
