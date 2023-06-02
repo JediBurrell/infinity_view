@@ -46,6 +46,14 @@ class InfinityView extends StatefulWidget {
   /// By default, the focal point is based on the user input.
   final Alignment? focalPointAlignment;
 
+  /// The sensitivity of the scroll wheel.
+  /// The scale factor is calculated as `1 ± scrollWheelSensitivity / 10`.
+  /// So, with the default value, zooming in with the scroll wheel will apply
+  /// a scale factor of 1.1, and zooming out will apply a scale factor of 0.9.
+  ///
+  /// Defaults to 1.0.
+  final double scrollWheelSensitivity;
+
   /// Determines whether the [InfinityView] should apply the translation
   ///
   /// You can use this to only allow translation when a certain condition is met.
@@ -75,6 +83,7 @@ class InfinityView extends StatefulWidget {
     this.shouldTranslate = true,
     this.shouldScale = true,
     this.shouldRotate = false,
+    this.scrollWheelSensitivity = 1.0,
     this.focalPointAlignment,
     this.translationTest,
     this.scaleTest,
@@ -109,7 +118,8 @@ class _InfinityViewState extends State<InfinityView> {
       onPointerSignal: (event) {
         if (event is PointerScrollEvent) {
           onScaleStart(GenericTransformStartDetails.fromPointerScroll(event));
-          onScaleUpdate(GenericTransformUpdateDetails.fromPointerScroll(event));
+          onScaleUpdate(GenericTransformUpdateDetails.fromPointerScroll(
+              event, widget.scrollWheelSensitivity));
         }
       },
       child: GestureDetector(
@@ -309,11 +319,14 @@ class GenericTransformUpdateDetails {
   }
 
   factory GenericTransformUpdateDetails.fromPointerScroll(
-      PointerScrollEvent details) {
+      PointerScrollEvent details,
+      [double scrollWheelSensitivity = 1.0]) {
     return GenericTransformUpdateDetails(
       focalPoint: details.position,
       localFocalPoint: details.localPosition,
-      scale: details.scrollDelta.dy > 0 ? 0.9 : 1.1,
+      scale: details.scrollDelta.dy > 0
+          ? 1 - scrollWheelSensitivity / 10
+          : 1 + scrollWheelSensitivity / 10,
       rotation: 0.0,
       kind: details.kind,
       buttons: details.buttons,
