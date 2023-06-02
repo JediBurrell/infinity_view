@@ -106,6 +106,12 @@ class _InfinityViewState extends State<InfinityView> {
           onScaleUpdate(GenericTransformUpdateDetails.fromPointerMove(details));
         }
       },
+      onPointerSignal: (event) {
+        if (event is PointerScrollEvent) {
+          onScaleStart(GenericTransformStartDetails.fromPointerScroll(event));
+          onScaleUpdate(GenericTransformUpdateDetails.fromPointerScroll(event));
+        }
+      },
       child: GestureDetector(
         behavior: HitTestBehavior.deferToChild,
         supportedDevices: const {PointerDeviceKind.touch},
@@ -244,6 +250,13 @@ class GenericTransformStartDetails {
       focalPoint: details.position,
     );
   }
+
+  factory GenericTransformStartDetails.fromPointerScroll(
+      PointerScrollEvent details) {
+    return GenericTransformStartDetails(
+      focalPoint: details.position,
+    );
+  }
 }
 
 class GenericTransformUpdateDetails {
@@ -300,6 +313,19 @@ class GenericTransformUpdateDetails {
       kind: details.kind,
       buttons: details.buttons,
       pointerCount: 1,
+    );
+  }
+
+  factory GenericTransformUpdateDetails.fromPointerScroll(
+      PointerScrollEvent details) {
+    return GenericTransformUpdateDetails(
+      focalPoint: details.position,
+      localFocalPoint: details.localPosition,
+      scale: details.scrollDelta.dy > 0 ? 0.9 : 1.1,
+      rotation: 0.0,
+      kind: details.kind,
+      buttons: details.buttons,
+      pointerCount: 0,
     );
   }
 }
