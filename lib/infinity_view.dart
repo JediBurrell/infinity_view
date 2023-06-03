@@ -25,6 +25,9 @@ class InfinityView extends StatefulWidget {
   /// The [child] widget that will be transformed by the [InfinityView].
   final Widget child;
 
+  /// Provides access to manipulate the [InfinityView] programmaticaly.
+  final InfinityViewController? controller;
+
   /// Whether or not translation gestures should be applied.
   ///
   /// Defaults to true.
@@ -112,6 +115,7 @@ class InfinityView extends StatefulWidget {
   const InfinityView({
     Key? key,
     required this.child,
+    this.controller,
     this.shouldTranslate = true,
     this.shouldScale = true,
     this.shouldRotate = false,
@@ -132,6 +136,18 @@ class InfinityView extends StatefulWidget {
 
 class _InfinityViewState extends State<InfinityView> {
   Matrix4 matrix = Matrix4.identity();
+
+  @override
+  void initState() {
+    widget.controller?.reset = _resetView;
+    widget.controller?.setTranslation = _setTranslation;
+    widget.controller?.setRotation = _setRotation;
+    widget.controller?.setScale = _setScale;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      widget.controller?.onReady?.call(widget.controller!);
+    });
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -198,6 +214,12 @@ class _InfinityViewState extends State<InfinityView> {
         ),
       ),
     );
+  }
+
+  void _resetView() {
+    setState(() {
+      matrix = Matrix4.identity();
+    });
   }
 
   Offset translation = Offset.zero;
@@ -276,6 +298,82 @@ class _InfinityViewState extends State<InfinityView> {
       ..translate(dx, dy)
       ..rotateZ(angle);
   }
+
+  void _setTranslation(Offset translation) {
+    setState(() {
+      matrix.setTranslationRaw(translation.dx, translation.dy, 0);
+    });
+  }
+
+  void _setRotation(double rotation) {
+    var array = matrix.applyToVector3Array([0, 0, 0, 1, 0, 0]);
+    Offset delta = Offset(array[3] - array[0], array[4] - array[1]);
+
+    setState(() {
+      matrix *= _rotate(-delta.direction + rotation,
+          Alignment.center.alongSize(context.size!));
+    });
+  }
+
+  void _setScale(double scale) {
+    var array = matrix.applyToVector3Array([0, 0, 0, 1, 0, 0]);
+    Offset delta = Offset(array[3] - array[0], array[4] - array[1]);
+
+    setState(() {
+      matrix *=
+          _scale(1 / delta.distance, Alignment.center.alongSize(context.size!));
+      matrix *= _scale(scale, Alignment.center.alongSize(context.size!));
+    });
+  }
+}
+
+/// [InfinityViewController] allows you to manipulate the [InfinityView] from
+/// outside of the widget.
+///
+/// None of the methods are available until the [InfinityView] has initialized.
+/// If you want to manipulate the [InfinityView] before it is ready, you can
+/// pass a callback to the [onReady] parameter that will be called as soon as
+/// the functions are plugged into the controller.
+///
+/// If you would like to do this outside of the controller (for example, in
+/// `initState`), you can use `WidgetsBinding.instance.addPostFrameCallback` to
+/// safely call the methods.
+class InfinityViewController {
+  /// Resets the [InfinityView] to its original transformations.
+  late final Function reset;
+
+  /// Sets the scale of the [InfinityView].
+  ///
+  /// The default scale is 1.0, a greater value will zoom in and a lesser value
+  /// will zoom out.
+  late final Function(double scale) setScale;
+
+  /// Sets the translation of the [InfinityView].
+  ///
+  /// This takes an [Offset] that represents the translation in the X and Y
+  /// axis.
+  late final Function(Offset translation) setTranslation;
+
+  /// Sets the rotation of the [InfinityView].
+  ///
+  /// This takes a double that represents the rotation in radians.
+  late final Function(double rotation) setRotation;
+
+  /// Sets the rotation of the [InfinityView].
+  ///
+  /// This takes a double that represents the rotation in degrees.
+  void setRotationInDegrees(double rotation) {
+    setRotation(rotation * pi / 180);
+  }
+
+  /// Since none of the methods are available until the [InfinityView] has
+  /// initialized, you can pass a callback that will be called as soon as the
+  /// functions are plugged into the controller.
+  ///
+  /// This is only necessary if you want to manipulate the [InfinityView]
+  /// immediately when the widget is first built.
+  final void Function(InfinityViewController controller)? onReady;
+  InfinityViewController({this.onReady});
 }
 
 /// Defines different behaviors for how the scroll wheel on a mouse is handled.
