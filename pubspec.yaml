@@ -1,6 +1,6 @@
 name: infinity_view
 description: Infinity View allows you to create a view that can be transformed infinitely.
-version: 0.2.0
+version: 0.2.1
 repository: https://github.com/JediBurrell/infinity_view
 
 environment:
