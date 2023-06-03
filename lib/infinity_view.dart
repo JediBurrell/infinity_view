@@ -245,8 +245,8 @@ class _InfinityViewState extends State<InfinityView> {
   Matrix4 _scale(double scale, Offset focalPoint) {
     var delta = focalPoint * (1 - scale);
     return Matrix4.identity()
-      ..scale(scale)
-      ..translate(delta.dx, delta.dy);
+      ..translate(delta.dx, delta.dy)
+      ..scale(scale);
   }
 
   Matrix4 _rotate(double angle, Offset focalPoint) {
