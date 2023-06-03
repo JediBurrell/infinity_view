@@ -9,3 +9,7 @@ You can adjust the mouse zoom speed with `scrollWheelSensitivity`.
 
 Added rotation snapping.  
 Can be enabled by setting `rotationSnappingThreshold`.
+
+## 0.2.1
+
+Bug fixed where scale was not properly adjusting to the focal point.
