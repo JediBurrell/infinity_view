@@ -9,6 +9,7 @@ import 'infinity_events.dart';
 
 typedef TransformTestCallback = bool Function(
     GenericTransformUpdateDetails details);
+typedef ScrollWheelCallback = ScrollWheelBehavior? Function();
 
 /// [InfinityView] allows the child widget to be translated, scaled and rotated
 /// infinitely with user input.
@@ -47,6 +48,18 @@ class InfinityView extends StatefulWidget {
   /// When set, it will align the focal point to the specified alignment.
   /// By default, the focal point is based on the user input.
   final Alignment? focalPointAlignment;
+
+  /// The default behavior for the scroll wheel.
+  /// This will be overridden by [scrollWheelHandler] if it returns a non-null value.
+  ///
+  /// Defaults to [ScrollWheelBehavior.scale].
+  final ScrollWheelBehavior scrollWheelBehavior;
+
+  /// A callback that allows for changing the scroll wheel behavior based on
+  /// external factors.
+  ///
+  /// If the callback returns null, the [scrollWheelBehavior] will be used.
+  final ScrollWheelCallback? scrollWheelHandler;
 
   /// The sensitivity of the scroll wheel.
   /// The scale factor is calculated as `1 ± scrollWheelSensitivity / 10`.
@@ -102,6 +115,8 @@ class InfinityView extends StatefulWidget {
     this.shouldTranslate = true,
     this.shouldScale = true,
     this.shouldRotate = false,
+    this.scrollWheelBehavior = ScrollWheelBehavior.scale,
+    this.scrollWheelHandler,
     this.scrollWheelSensitivity = 1.0,
     this.rotationSnappingTheshold = 0.0,
     this.rotationSnappingIncrements = 90.0,
@@ -148,9 +163,13 @@ class _InfinityViewState extends State<InfinityView> {
       },
       onPointerSignal: (event) {
         if (event is PointerScrollEvent) {
+          ScrollWheelBehavior behavior =
+              widget.scrollWheelHandler?.call() ?? widget.scrollWheelBehavior;
+          if (behavior == ScrollWheelBehavior.ignore) return;
+
           onScaleStart(GenericTransformStartDetails.fromPointerScroll(event));
           onScaleUpdate(GenericTransformUpdateDetails.fromPointerScroll(
-              event, widget.scrollWheelSensitivity));
+              event, behavior, widget.scrollWheelSensitivity));
         }
       },
       child: GestureDetector(
@@ -257,4 +276,49 @@ class _InfinityViewState extends State<InfinityView> {
       ..translate(dx, dy)
       ..rotateZ(angle);
   }
+}
+
+/// Defines different behaviors for how the scroll wheel on a mouse is handled.
+enum ScrollWheelBehavior {
+  /// Scroll wheel events are ignored.
+  ignore,
+
+  /// Scroll wheel events scroll in the X axis.
+  ///
+  /// A positive scroll wheel event pans to the right (x += delta).<br/>
+  /// A negative scroll wheel event pans to the left (x -= delta).
+  translateX,
+
+  /// Scroll wheel events scroll in the X axis, but inverted.
+  ///
+  /// A positive scroll wheel event pans to the left (x -= delta).<br/>
+  /// A negative scroll wheel event pans to the right (x += delta).
+  translateXInvert,
+
+  /// Scroll wheel events scroll in the Y axis.
+  ///
+  /// A positive scroll wheel event pans up (y -= delta).<br/>
+  /// A negative scroll wheel event pans down (y += delta).
+  translateY,
+
+  /// Scroll wheel events scroll in the Y axis, but inverted.
+  ///
+  /// A positive scroll wheel event pans down (y += delta).<br/>
+  /// A negative scroll wheel event pans up (y -= delta).
+  translateYInvert,
+
+  /// Scroll wheel events rotate clockwise.
+  ///
+  /// A positive scroll wheel event rotates clockwise (angle += delta).<br/>
+  /// A negative scroll wheel event rotates counter-clockwise (angle -= delta).
+  rotateClockwise,
+
+  /// Scroll wheel events rotate counter-clockwise.
+  ///
+  /// A positive scroll wheel event rotates counter-clockwise (angle -= delta).<br/>
+  /// A negative scroll wheel event rotates clockwise (angle += delta).
+  rotateCounterClockwise,
+
+  /// Scroll wheel events zoom in and out.
+  scale,
 }

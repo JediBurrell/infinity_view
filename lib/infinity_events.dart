@@ -1,4 +1,5 @@
 import 'package:flutter/gestures.dart';
+import 'package:infinity_view/infinity_view.dart';
 
 /// [GenericTransformStartDetails] genericizes all used input down events
 /// into a single class. This allows us to use the same logic for all input events.
@@ -149,15 +150,47 @@ class GenericTransformUpdateDetails {
   }
 
   factory GenericTransformUpdateDetails.fromPointerScroll(
-      PointerScrollEvent details,
+      PointerScrollEvent details, ScrollWheelBehavior scrollWheelBehavior,
       [double scrollWheelSensitivity = 1.0]) {
+    Offset focalPoint = details.position;
+    Offset localFocalPoint = details.localPosition;
+    double rotation = 0.0;
+    double scale = 1.0;
+
+    switch (scrollWheelBehavior) {
+      case ScrollWheelBehavior.translateX:
+        focalPoint -= Offset(details.scrollDelta.dy / 5, 0);
+        localFocalPoint -= Offset(details.scrollDelta.dy / 5, 0);
+        break;
+      case ScrollWheelBehavior.translateXInvert:
+        focalPoint += Offset(details.scrollDelta.dy / 5, 0);
+        localFocalPoint += Offset(details.scrollDelta.dy / 5, 0);
+        break;
+      case ScrollWheelBehavior.translateY:
+        focalPoint -= details.scrollDelta / 5;
+        localFocalPoint -= details.scrollDelta / 5;
+        break;
+      case ScrollWheelBehavior.translateYInvert:
+        focalPoint += details.scrollDelta / 5;
+        localFocalPoint += details.scrollDelta / 5;
+        break;
+      case ScrollWheelBehavior.rotateClockwise:
+        rotation += details.scrollDelta.dy > 0 ? -0.1 : 0.1;
+        break;
+      case ScrollWheelBehavior.rotateCounterClockwise:
+        rotation += details.scrollDelta.dy > 0 ? 0.1 : -0.1;
+        break;
+      default:
+        scale += details.scrollDelta.dy > 0
+            ? -scrollWheelSensitivity / 10
+            : scrollWheelSensitivity / 10;
+    }
+
     return GenericTransformUpdateDetails(
-      focalPoint: details.position,
-      localFocalPoint: details.localPosition,
-      scale: details.scrollDelta.dy > 0
-          ? 1 - scrollWheelSensitivity / 10
-          : 1 + scrollWheelSensitivity / 10,
-      rotation: 0.0,
+      focalPoint: focalPoint,
+      localFocalPoint: localFocalPoint,
+      scale: scale,
+      rotation: rotation,
       kind: details.kind,
       buttons: details.buttons,
       pointerCount: 0,
