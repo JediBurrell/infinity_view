@@ -205,18 +205,21 @@ class _InfinityViewState extends State<InfinityView> {
             onScaleStart(GenericTransformStartDetails.fromScaleStart(details)),
         onScaleUpdate: (details) => onScaleUpdate(
             GenericTransformUpdateDetails.fromScaleUpdate(details)),
-        child: Container(
-          // We're using a transparent container to allow the child to receive
-          // pointer events outside of the child's bounds.
-          color: Colors.transparent,
-          child: Transform.rotate(
-            angle: snappedRot - rot,
-            child: Transform(
-              transform: matrix,
-              child: Container(
-                color: Colors.transparent,
-                child: SizedBox.expand(
-                  child: ClipRect(child: widget.child),
+        child: SizedBox.expand(
+          child: Container(
+            // We're using a transparent container to allow the child to receive
+            // pointer events outside of the child's bounds.
+            color: Colors.transparent,
+            child: Transform.rotate(
+              angle: snappedRot - rot,
+              child: Transform(
+                transform: matrix,
+                child: OverflowBox(
+                  minWidth: 0,
+                  minHeight: 0,
+                  maxWidth: double.infinity,
+                  maxHeight: double.infinity,
+                  child: widget.child,
                 ),
               ),
             ),
