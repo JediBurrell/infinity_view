@@ -13,3 +13,10 @@ Can be enabled by setting `rotationSnappingThreshold`.
 ## 0.2.1
 
 Bug fixed where scale was not properly adjusting to the focal point.
+
+## 0.3.0
+
+Add more options for the mouse scroll wheel.  
+You can change this by passing a `ScrollWheelBehavior` to `scrollWheelBehavior` parameter or by returning a `ScrollWheelBehavior` in a callback through `scrollWheelHandler`.
+
+Adds `InfinityViewController` which allows you to manipulate the transformations programmatically.
