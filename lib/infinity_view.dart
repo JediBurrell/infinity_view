@@ -139,14 +139,24 @@ class _InfinityViewState extends State<InfinityView> {
 
   @override
   void initState() {
+    super.initState();
+    _attachController();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      widget.controller?.onReady?.call(widget.controller!);
+    });
+  }
+
+  @override
+  void didUpdateWidget(covariant InfinityView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _attachController();
+  }
+
+  void _attachController() {
     widget.controller?.reset = _resetView;
     widget.controller?.setTranslation = _setTranslation;
     widget.controller?.setRotation = _setRotation;
     widget.controller?.setScale = _setScale;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      widget.controller?.onReady?.call(widget.controller!);
-    });
-    super.initState();
   }
 
   @override
@@ -340,24 +350,24 @@ class _InfinityViewState extends State<InfinityView> {
 /// safely call the methods.
 class InfinityViewController {
   /// Resets the [InfinityView] to its original transformations.
-  late final Function reset;
+  late Function reset;
 
   /// Sets the scale of the [InfinityView].
   ///
   /// The default scale is 1.0, a greater value will zoom in and a lesser value
   /// will zoom out.
-  late final Function(double scale) setScale;
+  late Function(double scale) setScale;
 
   /// Sets the translation of the [InfinityView].
   ///
   /// This takes an [Offset] that represents the translation in the X and Y
   /// axis.
-  late final Function(Offset translation) setTranslation;
+  late Function(Offset translation) setTranslation;
 
   /// Sets the rotation of the [InfinityView].
   ///
   /// This takes a double that represents the rotation in radians.
-  late final Function(double rotation) setRotation;
+  late Function(double rotation) setRotation;
 
   /// Sets the rotation of the [InfinityView].
   ///
