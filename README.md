@@ -1,6 +1,8 @@
 # infinity_view
 
 
+![An example showing many randomly placed colorful cubes being translated with InfinityView](example/example.gif)
+
   Infinity View allows you to easily create an infinite viewport for your widget. Be it an image, a canvas, or your entire app—the sky is the widget!
 
 Unlike `InteractiveViewer`, it has no boundaries, allowing you to zoom in or out, pan through or around, and rotate as much as you’d like.
@@ -103,6 +105,57 @@ RawKeyboardEvent(
 ```
 
 Simple!
+
+### Are you experiencing issues?
+You might need to use `shrinkWrap`.
+
+By default, `shrinkWrap` is set to true. This passes the constraints of the `InfinityView` onto the child widget. While the widget is not necessarily limited to those constraints, it will affect the layout.
+
+If you’re using a widget with an infinite size, such as `Stack`, you must have `shrinkWrap` set to true as you cannot have an infinitely sized widget inside an infinitely sizeable widget.
+
+By turning off `shrinkWrap` the `InfinityView` has a maximum size of infinity which means that no constraints are passed onto the child widget. This means that the child widget must have a defined size less than infinity.
+
+To demonstrate how `shrinkWrap` works, here’s a very basic example:
+
+```dart
+InfinityView(
+  shrinkWrap: true, // This is the default value.
+  child: FlutterLogo(size: 5000),
+)
+```
+
+![The Flutter logo fits snugly within the InfinityView](example/shrinkwrap_true.png)
+
+If we set the `shrinkWrap` to false, it’s no longer bounded by the parent container and can take up its full size.
+
+![The Flutter logo now takes up 5000x5000 pixels, extending beyond the screens boundaries.](example/shrinkwrap_false.png)
+
+Both are still infinitely transformable.
+
+Again, just because the constraints are passed onto the child container does not mean that it cannot go beyond those constraints. You can use a `Stack` with `shrinkWrap`, but you’ll get an error without it.
+
+```dart
+InfinityView(
+  shrinkWrap: true, // This is the default value, specifying this is not required.
+  child: const Stack(
+    alignment: Alignment.center,
+    clipBehavior: Clip.none,
+    children: [
+      Positioned(
+        width: 5000,
+        height: 5000,
+        child: FlutterLogo()
+      ),
+    ]
+  ),
+)
+```
+
+Scaffold is a similarly infinite widget, so `shrinkWrap` must be enabled.
+
+![The Scaffold is wrapped in an InfinityView which allows the entire app to be transformed](example/scaffold.png)
+
+You’ll notice the `FlutterLogo` is also transformed. If you’re nesting InfinityViews, the parent InfinityView `shrinkWrap` must be true as the `InfinityView` takes up as much space as is possible, and in the case of an unshrinkwrapped `InfinityView`, that possible space is infinite.
 
 ##  Additional information
 
