@@ -1,7 +1,7 @@
 # infinity_view
 
 
-![An example showing many randomly placed colorful cubes being translated with InfinityView](example/example.gif)
+![An example showing many randomly placed colorful cubes being translated with InfinityView](https://github.com/JediBurrell/infinity_view/blob/main/example/example.gif)
 
   Infinity View allows you to easily create an infinite viewport for your widget. Be it an image, a canvas, or your entire app—the sky is the widget!
 
@@ -26,7 +26,7 @@ And finally wrap the widget you desire in the `InfinityView`:
 
 ```dart
 InfinityView(
-	child: Image.network(‘https://i.imgur.com/tCoqEwy.gif’);
+	child: Image.network('https://i.imgur.com/tCoqEwy.gif');
 )
 ```
   
@@ -124,11 +124,11 @@ InfinityView(
 )
 ```
 
-![The Flutter logo fits snugly within the InfinityView](example/shrinkwrap_true.png)
+![The Flutter logo fits snugly within the InfinityView](https://github.com/JediBurrell/infinity_view/blob/main/example/shrinkwrap_true.gif)
 
 If we set the `shrinkWrap` to false, it’s no longer bounded by the parent container and can take up its full size.
 
-![The Flutter logo now takes up 5000x5000 pixels, extending beyond the screens boundaries.](example/shrinkwrap_false.png)
+![The Flutter logo now takes up 5000x5000 pixels, extending beyond the screens boundaries.](https://github.com/JediBurrell/infinity_view/blob/main/example/shrinkwrap_false.png)
 
 Both are still infinitely transformable.
 
@@ -153,7 +153,7 @@ InfinityView(
 
 Scaffold is a similarly infinite widget, so `shrinkWrap` must be enabled.
 
-![The Scaffold is wrapped in an InfinityView which allows the entire app to be transformed](example/scaffold.png)
+![The Scaffold is wrapped in an InfinityView which allows the entire app to be transformed](https://github.com/JediBurrell/infinity_view/blob/main/example/scaffold.png)
 
 You’ll notice the `FlutterLogo` is also transformed. If you’re nesting InfinityViews, the parent InfinityView `shrinkWrap` must be true as the `InfinityView` takes up as much space as is possible, and in the case of an unshrinkwrapped `InfinityView`, that possible space is infinite.
 
