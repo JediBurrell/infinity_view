@@ -124,7 +124,7 @@ InfinityView(
 )
 ```
 
-![The Flutter logo fits snugly within the InfinityView](https://github.com/JediBurrell/infinity_view/blob/main/example/shrinkwrap_true.gif)
+![The Flutter logo fits snugly within the InfinityView](https://github.com/JediBurrell/infinity_view/blob/main/example/shrinkwrap_true.png)
 
 If we set the `shrinkWrap` to false, it’s no longer bounded by the parent container and can take up its full size.
 
