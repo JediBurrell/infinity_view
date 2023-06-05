@@ -28,6 +28,24 @@ class InfinityView extends StatefulWidget {
   /// Provides access to manipulate the [InfinityView] programmaticaly.
   final InfinityViewController? controller;
 
+  /// Whether the overflow is constrained by the parent.
+  ///
+  /// If this value is true, the overflow will be sized to its parent which will
+  /// allow an infinite child widget (e.g. Stack) and pass the constraints onto its child.
+  ///
+  /// If the value is false the overflow will be infinite, which means that the
+  /// constraints will not be passed onto the child and the child must have a defined
+  /// size less than infinity (though conceivably any size).
+  ///
+  /// As a general rule, if you want to have an infinite child widget, set this to true.
+  /// If the child widget has a defined size (or should size according to its parent,
+  /// e.g. Scaffold) set this to false.
+  ///
+  /// If you're getting an overflow error, this is probably the parameter you want to change.
+  ///
+  /// This is set to true by default.
+  final bool shrinkWrap;
+
   /// Whether or not translation gestures should be applied.
   ///
   /// Defaults to true.
@@ -116,6 +134,7 @@ class InfinityView extends StatefulWidget {
     Key? key,
     required this.child,
     this.controller,
+    this.shrinkWrap = true,
     this.shouldTranslate = true,
     this.shouldScale = true,
     this.shouldRotate = false,
@@ -215,10 +234,10 @@ class _InfinityViewState extends State<InfinityView> {
               child: Transform(
                 transform: matrix,
                 child: OverflowBox(
-                  minWidth: 0,
-                  minHeight: 0,
-                  maxWidth: double.infinity,
-                  maxHeight: double.infinity,
+                  minWidth: widget.shrinkWrap ? null : 0,
+                  minHeight: widget.shrinkWrap ? null : 0,
+                  maxWidth: widget.shrinkWrap ? null : double.infinity,
+                  maxHeight: widget.shrinkWrap ? null : double.infinity,
                   child: widget.child,
                 ),
               ),
