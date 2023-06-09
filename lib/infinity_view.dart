@@ -174,8 +174,11 @@ class _InfinityViewState extends State<InfinityView> {
   void _attachController() {
     widget.controller?.reset = _resetView;
     widget.controller?.setTranslation = _setTranslation;
+    widget.controller?.getTranslation = _getTranslation;
     widget.controller?.setRotation = _setRotation;
+    widget.controller?.getRotation = _getRotation;
     widget.controller?.setScale = _setScale;
+    widget.controller?.getScale = _getScale;
   }
 
   @override
@@ -337,6 +340,11 @@ class _InfinityViewState extends State<InfinityView> {
     });
   }
 
+  Offset _getTranslation() {
+    var array = matrix.applyToVector3Array([0, 0, 0, 1, 0, 0]);
+    return Offset(array[0], array[1]);
+  }
+
   void _setRotation(double rotation) {
     var array = matrix.applyToVector3Array([0, 0, 0, 1, 0, 0]);
     Offset delta = Offset(array[3] - array[0], array[4] - array[1]);
@@ -345,6 +353,12 @@ class _InfinityViewState extends State<InfinityView> {
       matrix *= _rotate(-delta.direction + rotation,
           Alignment.center.alongSize(context.size!));
     });
+  }
+
+  double _getRotation() {
+    var array = matrix.applyToVector3Array([0, 0, 0, 1, 0, 0]);
+    Offset delta = Offset(array[3] - array[0], array[4] - array[1]);
+    return delta.direction;
   }
 
   void _setScale(double scale) {
@@ -356,6 +370,12 @@ class _InfinityViewState extends State<InfinityView> {
           _scale(1 / delta.distance, Alignment.center.alongSize(context.size!));
       matrix *= _scale(scale, Alignment.center.alongSize(context.size!));
     });
+  }
+
+  double _getScale() {
+    var array = matrix.applyToVector3Array([0, 0, 0, 1, 0, 0]);
+    Offset delta = Offset(array[3] - array[0], array[4] - array[1]);
+    return delta.distance;
   }
 }
 
@@ -380,16 +400,25 @@ class InfinityViewController {
   /// will zoom out.
   late Function(double scale) setScale;
 
+  /// Returns the current scale of the [InfinityView].
+  late double Function() getScale;
+
   /// Sets the translation of the [InfinityView].
   ///
   /// This takes an [Offset] that represents the translation in the X and Y
   /// axis.
   late Function(Offset translation) setTranslation;
 
+  /// Returns the current translation of the [InfinityView].
+  late Offset Function() getTranslation;
+
   /// Sets the rotation of the [InfinityView].
   ///
   /// This takes a double that represents the rotation in radians.
   late Function(double rotation) setRotation;
+
+  /// Returns the current rotation of the [InfinityView].
+  late double Function() getRotation;
 
   /// Sets the rotation of the [InfinityView].
   ///
