@@ -417,15 +417,18 @@ class InfinityViewController {
   /// This takes a double that represents the rotation in radians.
   late Function(double rotation) setRotation;
 
-  /// Returns the current rotation of the [InfinityView].
-  late double Function() getRotation;
-
   /// Sets the rotation of the [InfinityView].
   ///
   /// This takes a double that represents the rotation in degrees.
   void setRotationInDegrees(double rotation) {
     setRotation(rotation * pi / 180);
   }
+
+  /// Returns the current rotation of the [InfinityView].
+  late double Function() getRotation;
+
+  /// Returns the current rotation of the [InfinityView] in degrees.
+  double get rotationInDegrees => getRotation() * 180 / pi;
 
   /// Since none of the methods are available until the [InfinityView] has
   /// initialized, you can pass a callback that will be called as soon as the
