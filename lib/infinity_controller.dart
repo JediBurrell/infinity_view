@@ -1,6 +1,4 @@
-import 'dart:math';
-
-import 'package:flutter/material.dart';
+part of 'infinity_view.dart';
 
 /// [InfinityViewController] allows you to manipulate the [InfinityView] from
 /// outside of the widget.

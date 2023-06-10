@@ -5,8 +5,8 @@ import 'dart:math';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
-import 'infinity_controller.dart';
-import 'infinity_events.dart';
+part 'infinity_controller.dart';
+part 'infinity_events.dart';
 
 typedef TransformTestCallback = bool Function(
     GenericTransformUpdateDetails details);

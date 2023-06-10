@@ -1,5 +1,4 @@
-import 'package:flutter/gestures.dart';
-import 'package:infinity_view/infinity_controller.dart';
+part of 'infinity_view.dart';
 
 /// [GenericTransformStartDetails] genericizes all used input down events
 /// into a single class. This allows us to use the same logic for all input events.
