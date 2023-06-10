@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:infinity_view/infinity_controller.dart';
 import 'package:infinity_view/infinity_view.dart';
 
 void main() {
