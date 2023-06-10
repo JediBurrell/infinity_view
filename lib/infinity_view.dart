@@ -253,33 +253,6 @@ class _InfinityViewState extends State<InfinityView> {
     );
   }
 
-  void _resetView() {
-    setState(() {
-      matrix = Matrix4.identity();
-    });
-  }
-
-  Offset translation = Offset.zero;
-  Offset _tDelta(Offset newTranslation) {
-    Offset oldTranslation = translation;
-    translation = newTranslation;
-    return newTranslation - oldTranslation;
-  }
-
-  double scale = 1.0;
-  double _sDelta(double newScale) {
-    double oldScale = scale;
-    scale = newScale;
-    return newScale / oldScale;
-  }
-
-  double rotation = 0.0;
-  double _rDelta(double newRotation) {
-    double oldRotation = rotation;
-    rotation = newRotation;
-    return newRotation - oldRotation;
-  }
-
   void onScaleStart(GenericTransformStartDetails details) {
     translation = details.focalPoint;
     scale = 1.0;
@@ -289,8 +262,7 @@ class _InfinityViewState extends State<InfinityView> {
   void onScaleUpdate(GenericTransformUpdateDetails details) {
     if (widget.locked) return;
 
-    final focalPointAlignment = widget.focalPointAlignment;
-    final focalPoint = focalPointAlignment?.alongSize(context.size!) ??
+    final focalPoint = widget.focalPointAlignment?.alongSize(context.size!) ??
         details.localFocalPoint;
     Matrix4 newMatrix = Matrix4.copy(matrix);
 
@@ -315,6 +287,27 @@ class _InfinityViewState extends State<InfinityView> {
     }
 
     setState(() => matrix = newMatrix);
+  }
+
+  Offset translation = Offset.zero;
+  Offset _tDelta(Offset newTranslation) {
+    Offset oldTranslation = translation;
+    translation = newTranslation;
+    return newTranslation - oldTranslation;
+  }
+
+  double scale = 1.0;
+  double _sDelta(double newScale) {
+    double oldScale = scale;
+    scale = newScale;
+    return newScale / oldScale;
+  }
+
+  double rotation = 0.0;
+  double _rDelta(double newRotation) {
+    double oldRotation = rotation;
+    rotation = newRotation;
+    return newRotation - oldRotation;
   }
 
   Matrix4 _translate(Offset translation) =>
@@ -353,5 +346,9 @@ class _InfinityViewState extends State<InfinityView> {
         matrix *= _scale(
             1 / delta.distance, Alignment.center.alongSize(context.size!));
         matrix *= _scale(scale, Alignment.center.alongSize(context.size!));
+      });
+
+  void _resetView() => setState(() {
+        matrix = Matrix4.identity();
       });
 }
