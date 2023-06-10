@@ -37,7 +37,7 @@ class InfinityExampleApp extends StatelessWidget {
 
   final InfinityViewController _controller =
       InfinityViewController(onReady: (controller) {
-    controller.setScale(0.25);
+    controller.scale = 0.25;
   });
 
   @override

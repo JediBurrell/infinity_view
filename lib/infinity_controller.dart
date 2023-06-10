@@ -12,44 +12,7 @@ part of 'infinity_view.dart';
 /// `initState`), you can use `WidgetsBinding.instance.addPostFrameCallback` to
 /// safely call the methods.
 class InfinityViewController {
-  /// Resets the [InfinityView] to its original transformations.
-  late Function reset;
-
-  /// Sets the scale of the [InfinityView].
-  ///
-  /// The default scale is 1.0, a greater value will zoom in and a lesser value
-  /// will zoom out.
-  late Function(double scale) setScale;
-
-  /// Returns the current scale of the [InfinityView].
-  late double Function() getScale;
-
-  /// Sets the translation of the [InfinityView].
-  ///
-  /// This takes an [Offset] that represents the translation in the X and Y
-  /// axis.
-  late Function(Offset translation) setTranslation;
-
-  /// Returns the current translation of the [InfinityView].
-  late Offset Function() getTranslation;
-
-  /// Sets the rotation of the [InfinityView].
-  ///
-  /// This takes a double that represents the rotation in radians.
-  late Function(double rotation) setRotation;
-
-  /// Sets the rotation of the [InfinityView].
-  ///
-  /// This takes a double that represents the rotation in degrees.
-  void setRotationInDegrees(double rotation) {
-    setRotation(rotation * pi / 180);
-  }
-
-  /// Returns the current rotation of the [InfinityView].
-  late double Function() getRotation;
-
-  /// Returns the current rotation of the [InfinityView] in degrees.
-  double get rotationInDegrees => getRotation() * 180 / pi;
+  InfinityViewController({this.onReady});
 
   /// Since none of the methods are available until the [InfinityView] has
   /// initialized, you can pass a callback that will be called as soon as the
@@ -58,7 +21,37 @@ class InfinityViewController {
   /// This is only necessary if you want to manipulate the [InfinityView]
   /// immediately when the widget is first built.
   final void Function(InfinityViewController controller)? onReady;
-  InfinityViewController({this.onReady});
+
+  late Function(double scale) _setScale;
+  late double Function() _getScale;
+  late Function(Offset translation) _setTranslation;
+  late Offset Function() _getTranslation;
+  late Function(double rotation) _setRotation;
+  late double Function() _getRotation;
+
+  /// The scale transformation of the [InfinityView].
+  double get scale => _getScale();
+  set scale(double scale) => _setScale(scale);
+
+  /// The translation transformation of the [InfinityView].
+  ///
+  /// This is an Offset that represents the translation in the X and Y axes.
+  Offset get translation => _getTranslation();
+  set translation(Offset translation) => _setTranslation(translation);
+
+  /// The rotation transformation of the [InfinityView] in radians.
+  double get rotation => _getRotation();
+  set rotation(double rotation) => _setRotation(rotation);
+
+  /// The rotation transformation of the [InfinityView] in degrees.
+  double get rotationInDegrees => _getRotation() * 180 / pi;
+  set rotationInDegrees(double rotation) => _setRotation(rotation * pi / 180);
+
+  /// Resets the [InfinityView] to its original transformations.
+  ///
+  /// Scale will be set to 1.0, translation will be set to (0, 0), and rotation
+  /// will be set to 0.0.
+  late Function reset;
 }
 
 /// Defines different behaviors for how the scroll wheel on a mouse is handled.

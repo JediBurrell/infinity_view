@@ -176,12 +176,12 @@ class _InfinityViewState extends State<InfinityView> {
 
   void _attachController() {
     widget.controller?.reset = _resetView;
-    widget.controller?.setTranslation = _setTranslation;
-    widget.controller?.getTranslation = _getTranslation;
-    widget.controller?.setRotation = _setRotation;
-    widget.controller?.getRotation = _getRotation;
-    widget.controller?.setScale = _setScale;
-    widget.controller?.getScale = _getScale;
+    widget.controller?._setTranslation = _setTranslation;
+    widget.controller?._getTranslation = _getTranslation;
+    widget.controller?._setRotation = _setRotation;
+    widget.controller?._getRotation = _getRotation;
+    widget.controller?._setScale = _setScale;
+    widget.controller?._getScale = _getScale;
   }
 
   @override
