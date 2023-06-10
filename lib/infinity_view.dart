@@ -156,6 +156,8 @@ class InfinityView extends StatefulWidget {
 
 class _InfinityViewState extends State<InfinityView> {
   Matrix4 matrix = Matrix4.identity();
+  List<double> get array => matrix.applyToVector3Array([0, 0, 0, 1, 0, 0]);
+  Offset get delta => Offset(array[3] - array[0], array[4] - array[1]);
 
   @override
   void initState() {
@@ -184,8 +186,7 @@ class _InfinityViewState extends State<InfinityView> {
 
   @override
   Widget build(BuildContext context) {
-    final array = matrix.applyToVector3Array([0, 0, 0, 1, 0, 0]);
-    double rot = Offset(array[3] - array[0], array[4] - array[1]).direction;
+    double rot = delta.direction;
     double snappedRot = rot;
     if ((rot.abs() + widget._rotationSnappingThesholdRadians / 2) %
             (widget._snappingMultiplesRadians) <
@@ -335,41 +336,22 @@ class _InfinityViewState extends State<InfinityView> {
       ..rotateZ(angle);
   }
 
-  void _setTranslation(Offset translation) {
-    setState(() {
-      matrix.setTranslationRaw(translation.dx, translation.dy, 0);
-    });
-  }
+  Offset _getTranslation() => Offset(array[0], array[1]);
+  double _getRotation() => delta.direction;
+  double _getScale() => delta.distance;
 
-  Offset _getTranslation() {
-    var array = matrix.applyToVector3Array([0, 0, 0, 1, 0, 0]);
-    return Offset(array[0], array[1]);
-  }
+  void _setTranslation(Offset translation) => setState(() {
+        matrix.setTranslationRaw(translation.dx, translation.dy, 0);
+      });
 
-  void _setRotation(double rotation) {
-    var array = matrix.applyToVector3Array([0, 0, 0, 1, 0, 0]);
-    Offset delta = Offset(array[3] - array[0], array[4] - array[1]);
+  void _setRotation(double rotation) => setState(() {
+        matrix *= _rotate(-delta.direction + rotation,
+            Alignment.center.alongSize(context.size!));
+      });
 
-    setState(() {
-      matrix *= _rotate(-delta.direction + rotation,
-          Alignment.center.alongSize(context.size!));
-    });
-  }
-
-  double _getRotation() {
-    var array = matrix.applyToVector3Array([0, 0, 0, 1, 0, 0]);
-    Offset delta = Offset(array[3] - array[0], array[4] - array[1]);
-    return delta.direction;
-  }
-
-  void _setScale(double scale) {
-    var array = matrix.applyToVector3Array([0, 0, 0, 1, 0, 0]);
-    Offset delta = Offset(array[3] - array[0], array[4] - array[1]);
-
-    setState(() {
-      matrix *=
-          _scale(1 / delta.distance, Alignment.center.alongSize(context.size!));
-      matrix *= _scale(scale, Alignment.center.alongSize(context.size!));
-    });
-  }
+  void _setScale(double scale) => setState(() {
+        matrix *= _scale(
+            1 / delta.distance, Alignment.center.alongSize(context.size!));
+        matrix *= _scale(scale, Alignment.center.alongSize(context.size!));
+      });
 }
