@@ -131,6 +131,16 @@ class InfinityView extends StatefulWidget {
   /// If null and [shouldRotate] is true, rotation will always be applied.
   final TransformTestCallback? rotateTest;
 
+  /// The curve to use when animating a transformation with the [InfinityViewController].
+  ///
+  /// Defaults to [Curves.linear].
+  final Curve animationCurve;
+
+  /// The duration to use when animating a transformation with the [InfinityViewController].
+  ///
+  /// Defaults to 300 milliseconds.
+  final Duration animationDuration;
+
   const InfinityView({
     Key? key,
     required this.child,
@@ -144,6 +154,8 @@ class InfinityView extends StatefulWidget {
     this.scrollWheelSensitivity = 1.0,
     this.rotationSnappingTheshold = 0.0,
     this.rotationSnappingIncrements = 90.0,
+    this.animationCurve = Curves.linear,
+    this.animationDuration = const Duration(milliseconds: 300),
     this.focalPointAlignment,
     this.translationTest,
     this.scaleTest,
@@ -154,34 +166,52 @@ class InfinityView extends StatefulWidget {
   State<InfinityView> createState() => _InfinityViewState();
 }
 
-class _InfinityViewState extends State<InfinityView> {
-  Matrix4 matrix = Matrix4.identity();
-  List<double> get array => matrix.applyToVector3Array([0, 0, 0, 1, 0, 0]);
+class _InfinityViewState extends State<InfinityView>
+    with TickerProviderStateMixin {
+  Animation<Matrix4> matrix = AlwaysStoppedAnimation(Matrix4.identity());
+  Matrix4 _animatedMatrix = Matrix4.identity();
+  late AnimationController controller;
+  List<double> get array =>
+      matrix.value.applyToVector3Array([0, 0, 0, 1, 0, 0]);
   Offset get delta => Offset(array[3] - array[0], array[4] - array[1]);
 
   @override
   void initState() {
     super.initState();
     _attachController();
+    controller =
+        AnimationController(vsync: this, duration: widget.animationDuration)
+          ..addListener(() => setState(
+                () {},
+              ));
     WidgetsBinding.instance.addPostFrameCallback((_) {
       widget.controller?.onReady?.call(widget.controller!);
     });
   }
 
   @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
   void didUpdateWidget(covariant InfinityView oldWidget) {
     super.didUpdateWidget(oldWidget);
     _attachController();
+    controller.duration = widget.animationDuration;
   }
 
   void _attachController() {
-    widget.controller?.reset = _resetView;
+    widget.controller?._reset = _resetView;
     widget.controller?._setTranslation = _setTranslation;
     widget.controller?._getTranslation = _getTranslation;
     widget.controller?._setRotation = _setRotation;
     widget.controller?._getRotation = _getRotation;
     widget.controller?._setScale = _setScale;
     widget.controller?._getScale = _getScale;
+    widget.controller?._initAnimation = _initAnimation;
+    widget.controller?._pushAnimation = _pushAnimation;
   }
 
   @override
@@ -237,7 +267,7 @@ class _InfinityViewState extends State<InfinityView> {
             child: Transform.rotate(
               angle: snappedRot - rot,
               child: Transform(
-                transform: matrix,
+                transform: matrix.value,
                 child: OverflowBox(
                   minWidth: widget.shrinkWrap ? null : 0,
                   minHeight: widget.shrinkWrap ? null : 0,
@@ -264,7 +294,7 @@ class _InfinityViewState extends State<InfinityView> {
 
     final focalPoint = widget.focalPointAlignment?.alongSize(context.size!) ??
         details.localFocalPoint;
-    Matrix4 newMatrix = Matrix4.copy(matrix);
+    Matrix4 newMatrix = Matrix4.copy(matrix.value);
 
     if (widget.shouldTranslate &&
         widget.translationTest?.call(details) != false) {
@@ -286,7 +316,7 @@ class _InfinityViewState extends State<InfinityView> {
       newMatrix = _rotate(delta, focalPoint) * newMatrix;
     }
 
-    setState(() => matrix = newMatrix);
+    setState(() => matrix = AlwaysStoppedAnimation(newMatrix));
   }
 
   Offset translation = Offset.zero;
@@ -333,22 +363,67 @@ class _InfinityViewState extends State<InfinityView> {
   double _getRotation() => delta.direction;
   double _getScale() => delta.distance;
 
-  void _setTranslation(Offset translation) => setState(() {
-        matrix.setTranslationRaw(translation.dx, translation.dy, 0);
-      });
+  void _setTranslation(Offset translation, [bool animate = false]) {
+    if (animate) {
+      _animatedMatrix.setTranslationRaw(translation.dx, translation.dy, 0);
+      return;
+    }
+    setState(() {
+      matrix.value.setTranslationRaw(translation.dx, translation.dy, 0);
+    });
+  }
 
-  void _setRotation(double rotation) => setState(() {
-        matrix *= _rotate(-delta.direction + rotation,
-            Alignment.center.alongSize(context.size!));
-      });
+  void _setRotation(double rotation, [bool animate = false]) {
+    if (animate) {
+      _animatedMatrix *= _rotate(-delta.direction + rotation,
+          Alignment.center.alongSize(context.size!));
+      return;
+    }
+    setState(() {
+      matrix = AlwaysStoppedAnimation(matrix.value *
+          _rotate(-delta.direction + rotation,
+              Alignment.center.alongSize(context.size!)));
+    });
+  }
 
-  void _setScale(double scale) => setState(() {
-        matrix *= _scale(
-            1 / delta.distance, Alignment.center.alongSize(context.size!));
-        matrix *= _scale(scale, Alignment.center.alongSize(context.size!));
-      });
+  void _setScale(double scale, [bool animate = false]) {
+    if (animate) {
+      _animatedMatrix *=
+          _scale(1 / delta.distance, Alignment.center.alongSize(context.size!));
+      _animatedMatrix *=
+          _scale(scale, Alignment.center.alongSize(context.size!));
+      return;
+    }
+    setState(() {
+      var descaled = matrix.value *
+          _scale(1 / delta.distance, Alignment.center.alongSize(context.size!));
+      matrix = AlwaysStoppedAnimation(
+          descaled * _scale(scale, Alignment.center.alongSize(context.size!)));
+    });
+  }
 
-  void _resetView() => setState(() {
-        matrix = Matrix4.identity();
-      });
+  void _initAnimation() {
+    _animatedMatrix = matrix.value.clone();
+  }
+
+  void _pushAnimation() {
+    setState(() {
+      matrix = Matrix4Tween(
+        begin: matrix.value,
+        end: _animatedMatrix,
+      ).chain(CurveTween(curve: widget.animationCurve)).animate(controller);
+      controller.forward(from: 0.0);
+    });
+  }
+
+  void _resetView([bool animate = false]) {
+    if (animate) {
+      _animatedMatrix = Matrix4.identity();
+      return;
+    }
+
+    setState(() {
+      matrix = AlwaysStoppedAnimation(Matrix4.identity());
+    });
+  }
 }

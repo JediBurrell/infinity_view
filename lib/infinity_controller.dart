@@ -22,36 +22,63 @@ class InfinityViewController {
   /// immediately when the widget is first built.
   final void Function(InfinityViewController controller)? onReady;
 
-  late Function(double scale) _setScale;
+  late Function() _initAnimation;
+  late Function() _pushAnimation;
+  bool _animate = false;
+
+  late Function(double scale, [bool animate]) _setScale;
   late double Function() _getScale;
-  late Function(Offset translation) _setTranslation;
+  late Function(Offset translation, [bool animate]) _setTranslation;
   late Offset Function() _getTranslation;
-  late Function(double rotation) _setRotation;
+  late Function(double rotation, [bool animate]) _setRotation;
   late double Function() _getRotation;
 
   /// The scale transformation of the [InfinityView].
   double get scale => _getScale();
-  set scale(double scale) => _setScale(scale);
+  set scale(double scale) => _setScale(scale, _animate);
 
   /// The translation transformation of the [InfinityView].
   ///
   /// This is an Offset that represents the translation in the X and Y axes.
   Offset get translation => _getTranslation();
-  set translation(Offset translation) => _setTranslation(translation);
+  set translation(Offset translation) => _setTranslation(translation, _animate);
 
   /// The rotation transformation of the [InfinityView] in radians.
   double get rotation => _getRotation();
-  set rotation(double rotation) => _setRotation(rotation);
+  set rotation(double rotation) => _setRotation(rotation, _animate);
 
   /// The rotation transformation of the [InfinityView] in degrees.
   double get rotationInDegrees => _getRotation() * 180 / pi;
-  set rotationInDegrees(double rotation) => _setRotation(rotation * pi / 180);
+  set rotationInDegrees(double rotation) =>
+      _setRotation(rotation * pi / 180, _animate);
+
+  /// Animates any values changed within the callback.
+  ///
+  /// ```dart
+  /// animate(() {
+  ///  translation += const Offset(-50, 0);
+  ///  scale *= 1.1;
+  /// });
+  /// ```
+  ///
+  /// You can also call [reset] within the callback to animate it.
+  ///
+  /// You can control the animation configuration by setting the
+  /// `animationCurve` and `animationDuration` within your [InfinityView]
+  void animate(VoidCallback callback) {
+    _animate = true;
+    _initAnimation();
+    callback();
+    _pushAnimation();
+    _animate = false;
+  }
 
   /// Resets the [InfinityView] to its original transformations.
   ///
   /// Scale will be set to 1.0, translation will be set to (0, 0), and rotation
   /// will be set to 0.0.
-  late Function reset;
+  void reset() => _reset(_animate);
+  late Function([bool animate]) _reset;
 }
 
 /// Defines different behaviors for how the scroll wheel on a mouse is handled.
